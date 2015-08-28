@@ -1,0 +1,5 @@
+A very simple tool to grab the public key of the remote server.
+
+No CA verification is done, so trust the results with a grain of salt.
+
+Licensed under the MIT license.
