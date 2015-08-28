@@ -19,11 +19,15 @@ func main() {
   flag.Parse()
 
   if (*server == "") {
-    panic("Need to specify a server.")
+    fmt.Fprintln(os.Stderr, "Need to specify a server.")
+    flag.Usage()
+    os.Exit(2)
   }
 
   if (*network != "tcp" && *network != "udp" && *network != "unix") {
-    panic("Unknown kind of network type! Try tcp.")
+    fmt.Fprintln(os.Stderr, "Unknown kind of network type! Try tcp.")
+    flag.Usage()
+    os.Exit(2)
   }
 
   var network_suffix string = ""
@@ -42,7 +46,8 @@ func main() {
     InsecureSkipVerify: !(*verify),
   })
   if err != nil {
-    panic("failed to connect: " + err.Error())
+    fmt.Fprintln(os.Stderr, "failed to connect: " + err.Error())
+    os.Exit(1)
   }
   conn.Close()
 
