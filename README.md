@@ -1,8 +1,8 @@
 # tls-grab
 
-A very simple tool to grab the public key of the remote server.
+A very simple tool to grab the public certificate or key of the remote server.
 
-No CA verification is done, so trust the results with a grain of salt.
+Verification is disabled by default. If you want that, pass `-verify`.
 
 Licensed under the MIT license.
 
