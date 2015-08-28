@@ -22,6 +22,14 @@ func main() {
   tls_state := conn.ConnectionState()
   remote_certs := tls_state.PeerCertificates
   for cert_count, cert := range remote_certs {
+    if (cert.BasicConstraintsValid) {
+      if (cert.IsCA) {
+        continue
+      }
+    } else {
+      continue
+    }
+
     fmt.Println("got cert #", cert_count)
 
     switch cert.PublicKeyAlgorithm {
@@ -37,6 +45,8 @@ func main() {
     default:
       fmt.Println("no clue")
     }
+
+    fmt.Println("subject print: ", cert.Subject)
   }
   fmt.Println("didn't break?")
 }
