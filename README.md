@@ -4,7 +4,13 @@ A simple utility to grab just a server's public certificate or fingerprint.
 
 Verification is disabled by default. If you want that, pass `-verify`.
 
-Licensed under the MIT license.
+Licensed under the MIT license. See LICENSE for details.
+
+## Install
+
+Installation is simple, assuming you already have [go set up][goinstall]:
+
+    go get -u github.com/evaryont/tls-grab
 
 ## Usage
 
@@ -23,3 +29,5 @@ Usage of tls-grab:
   -verify
         Verify the provided certificate against trusted CAs
 ```
+
+[goinstall]: https://golang.org/doc/install#install
