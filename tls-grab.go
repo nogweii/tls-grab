@@ -3,12 +3,34 @@ package main
 import (
 	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/pem"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
 )
+
+func pubkeyPemType(algorithm x509.PublicKeyAlgorithm) string {
+	var pem_type string
+
+	switch algorithm {
+	case x509.RSA:
+		pem_type = "RSA PUBLIC KEY"
+
+	case x509.ECDSA:
+		pem_type = "ECDSA PUBLIC KEY"
+
+	case x509.DSA:
+		pem_type = "DSA PUBLIC KEY"
+
+	default:
+		fmt.Fprintln(os.Stderr, "Unsupported public key algorithm")
+		os.Exit(1)
+	}
+
+	return pem_type
+}
 
 func main() {
 
@@ -19,6 +41,7 @@ func main() {
 	var ipv6only = flag.Bool("6", false, "Only connect via IPv6")
 	var verify = flag.Bool("verify", false, "Verify the provided certificate against trusted CAs")
 	var fingerprint = flag.Bool("fingerprint", false, "Print the SHA-256 fingerprint instead of the certificate")
+	var pubkey = flag.Bool("pubkey", false, "Print the public key instead of the certificate")
 	flag.Parse()
 
 	if *server == "" {
@@ -73,6 +96,11 @@ func main() {
 		if *fingerprint {
 			fmt.Println(strings.Replace(fmt.Sprintf("% X", sha256.Sum256(cert.Raw)),
 				" ", ":", -1))
+		} else if *pubkey {
+			pem.Encode(os.Stdout, &pem.Block{
+				Type: pubkeyPemType(cert.PublicKeyAlgorithm),
+				Bytes: cert.PublicKey,
+			})
 		} else {
 			pem.Encode(os.Stdout, &pem.Block{
 				Type:  "CERTIFICATE",
