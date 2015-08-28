@@ -4,7 +4,6 @@ import (
   "fmt"
   "os"
   "crypto/tls"
-  "crypto/x509"
   "encoding/pem"
   "flag"
 )
@@ -56,21 +55,8 @@ func main() {
       continue
     }
 
-    var pem_type string = ""
-
-    switch cert.PublicKeyAlgorithm {
-    case x509.RSA:
-      pem_type = "RSA PUBLIC KEY"
-
-    case x509.ECDSA:
-      pem_type = "ECDSA PUBLIC KEY"
-
-    case x509.DSA:
-      pem_type = "DSA PUBLIC KEY"
-    }
-
     pem_pubkey := &pem.Block{
-      Type: pem_type,
+      Type: "CERTIFICATE",
       Bytes: cert.Raw,
     }
     pem.Encode(os.Stdout, pem_pubkey)
