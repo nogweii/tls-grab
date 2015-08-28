@@ -1,6 +1,6 @@
 # tls-grab
 
-A very simple tool to grab the public certificate or key of the remote server.
+A simple utility to grab just a server's public certificate or fingerprint.
 
 Verification is disabled by default. If you want that, pass `-verify`.
 
