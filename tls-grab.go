@@ -57,10 +57,9 @@ func main() {
       continue
     }
 
-    pem_pubkey := &pem.Block{
+    pem.Encode(os.Stdout, &pem.Block{
       Type: "CERTIFICATE",
       Bytes: cert.Raw,
-    }
-    pem.Encode(os.Stdout, pem_pubkey)
+    })
   }
 }
