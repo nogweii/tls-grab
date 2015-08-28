@@ -9,12 +9,35 @@ import "flag"
 
 func main() {
 
-  var server = flag.String("server", "mail.google.com", "The TLS host (name or IP) to connect to")
+  var server = flag.String("server", "", "The TLS host (name or IP) to connect to")
   var port = flag.Int("port", 443, "The port the TLS service is running on")
+  var network = flag.String("net", "tcp", "Connect to this kind of network: tcp, udp, or unix")
+  var ipv4only = flag.Bool("4", false, "Only connect via IPv4")
+  var ipv6only = flag.Bool("6", false, "Only connect via IPv6")
   flag.Parse()
 
-  target_host := fmt.Sprintf("%s:%d", &server, &port)
+  if (*server == "") {
+    panic("Need to specify a server.")
+  }
 
+  if (*network != "tcp" && *network != "udp" && *network != "unix") {
+    panic("Unknown kind of network type! Try tcp.")
+  }
+
+  if (*ipv4only && *ipv6only) {
+    fmt.Println("Specifying both -4 & -6 is redundant, tls-grab will try both by default.")
+  }
+
+  var network_suffix string
+  if (*ipv4only) {
+    network_suffix = "4"
+  } else if (*ipv6only) {
+    network_suffix = "6"
+  } else {
+    network_suffix = ""
+  }
+
+  target_host := fmt.Sprintf("%s:%d via %s%s", *server, *port, *network, network_suffix)
   fmt.Println(target_host)
 
   /*
