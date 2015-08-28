@@ -1,11 +1,13 @@
 package main
 
-import "fmt"
-import "os"
-import "crypto/tls"
-import "crypto/x509"
-import "encoding/pem"
-import "flag"
+import (
+  "fmt"
+  "os"
+  "crypto/tls"
+  "crypto/x509"
+  "encoding/pem"
+  "flag"
+)
 
 func main() {
 
