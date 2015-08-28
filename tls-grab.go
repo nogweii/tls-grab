@@ -1,10 +1,10 @@
 package main
 
 import "fmt"
-//import "os"
-//import "crypto/tls"
-//import "crypto/x509"
-//import "encoding/pem"
+import "os"
+import "crypto/tls"
+import "crypto/x509"
+import "encoding/pem"
 import "flag"
 
 func main() {
@@ -33,11 +33,10 @@ func main() {
     network_suffix = "6"
   }
 
-  target_host := fmt.Sprintf("%s:%d via %s%s", *server, *port, *network, network_suffix)
-  fmt.Println(target_host)
+  target_host := fmt.Sprintf("%s:%d", *server, *port)
+  network_type := fmt.Sprintf("%s%s", *network, network_suffix)
 
-  /*
-  conn, err := tls.Dial("tcp", target_host, &tls.Config{
+  conn, err := tls.Dial(network_type, target_host, &tls.Config{
     InsecureSkipVerify: true,
   })
   if err != nil {
@@ -74,5 +73,4 @@ func main() {
     }
     pem.Encode(os.Stdout, pem_pubkey)
   }
-  */
 }
