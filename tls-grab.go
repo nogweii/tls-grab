@@ -45,6 +45,9 @@ func main() {
   target_host := fmt.Sprintf("%s:%d", *server, *port)
   network_type := fmt.Sprintf("%s%s", *network, network_suffix)
 
+  // Merely connect to the service, do the full handshake and then immediately
+  // close the connection. All the information we care about is given in the
+  // handshake.
   conn, err := tls.Dial(network_type, target_host, &tls.Config{
     InsecureSkipVerify: !(*verify),
   })
@@ -57,6 +60,8 @@ func main() {
   tls_state := conn.ConnectionState()
   remote_certs := tls_state.PeerCertificates
   for _, cert := range remote_certs {
+    // skip all of the intermediary & root CA certificates provided by the
+    // server
     if (cert.BasicConstraintsValid) {
       if (cert.IsCA) {
         continue
