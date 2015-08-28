@@ -8,58 +8,70 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"path"
+	"log"
+)
+
+var (
+	server      = flag.String("server", "", "The TLS host (name or IP) to connect to")
+	port        = flag.Int("port", 443, "The port the TLS service is running on")
+	network     = flag.String("net", "tcp", "Connect to this kind of network: tcp, udp, or unix")
+	ipv4only    = flag.Bool("4", false, "Only connect via IPv4")
+	ipv6only    = flag.Bool("6", false, "Only connect via IPv6")
+	verify      = flag.Bool("verify", false, "Verify the provided certificate against trusted CAs")
+	fingerprint = flag.Bool("fingerprint", false, "Print the SHA-256 fingerprint instead of the certificate")
 )
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(
+			os.Stderr,
+			"Usage: %s [-4|-6] [-net=tcp|udp|unix] [-verify] [-port PORT] -server HOST\n",
+			path.Base(os.Args[0]),
+		)
+		fmt.Fprintf(os.Stderr, "A simple utility to grab just a server's public certificate or fingerprint.\n\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\n")
+	}
 
-	var server = flag.String("server", "", "The TLS host (name or IP) to connect to")
-	var port = flag.Int("port", 443, "The port the TLS service is running on")
-	var network = flag.String("net", "tcp", "Connect to this kind of network: tcp, udp, or unix")
-	var ipv4only = flag.Bool("4", false, "Only connect via IPv4")
-	var ipv6only = flag.Bool("6", false, "Only connect via IPv6")
-	var verify = flag.Bool("verify", false, "Verify the provided certificate against trusted CAs")
-	var fingerprint = flag.Bool("fingerprint", false, "Print the SHA-256 fingerprint instead of the certificate")
 	flag.Parse()
 
 	if *server == "" {
-		fmt.Fprintln(os.Stderr, "Need to specify a server.")
 		flag.Usage()
-		os.Exit(2)
+		log.Fatal("Need to specify a server.")
 	}
 
 	if *network != "tcp" && *network != "udp" && *network != "unix" {
-		fmt.Fprintln(os.Stderr, "Unknown kind of network type! Try tcp.")
 		flag.Usage()
-		os.Exit(2)
+		log.Fatal("Unknown kind of network type! Try tcp.")
 	}
 
-	var network_suffix string = ""
+	var networkSuffix string = ""
 	if *ipv4only && *ipv6only {
-		fmt.Println("Specifying both -4 & -6 is redundant")
+		log.Print("Specifying both -4 & -6 is redundant.")
 	} else if *ipv4only {
-		network_suffix = "4"
+		networkSuffix = "4"
 	} else if *ipv6only {
-		network_suffix = "6"
+		networkSuffix = "6"
 	}
 
-	target_host := fmt.Sprintf("%s:%d", *server, *port)
-	network_type := fmt.Sprintf("%s%s", *network, network_suffix)
+	targetHost := fmt.Sprintf("%s:%d", *server, *port)
+	networkType := fmt.Sprintf("%s%s", *network, networkSuffix)
 
 	// Merely connect to the service, do the full handshake and then immediately
 	// close the connection. All the information we care about is given in the
 	// handshake.
-	conn, err := tls.Dial(network_type, target_host, &tls.Config{
+	conn, err := tls.Dial(networkType, targetHost, &tls.Config{
 		InsecureSkipVerify: !(*verify),
 	})
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "failed to connect: "+err.Error())
-		os.Exit(1)
+		log.Fatalf("failed to connect: %s", err.Error())
 	}
 	conn.Close()
 
-	tls_state := conn.ConnectionState()
-	remote_certs := tls_state.PeerCertificates
-	for _, cert := range remote_certs {
+	tlsState := conn.ConnectionState()
+	remoteCerts := tlsState.PeerCertificates
+	for _, cert := range remoteCerts {
 		// skip all of the intermediary & root CA certificates provided by the
 		// server
 		if cert.BasicConstraintsValid {
@@ -71,6 +83,8 @@ func main() {
 		}
 
 		if *fingerprint {
+			// A certificate's fingerprint is simply the hash of the raw ASN.1 encoded
+			// certificate. Super simple.
 			fmt.Println(strings.Replace(fmt.Sprintf("% X", sha256.Sum256(cert.Raw)),
 				" ", ":", -1))
 		} else {
