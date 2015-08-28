@@ -24,17 +24,13 @@ func main() {
     panic("Unknown kind of network type! Try tcp.")
   }
 
+  var network_suffix string = ""
   if (*ipv4only && *ipv6only) {
-    fmt.Println("Specifying both -4 & -6 is redundant, tls-grab will try both by default.")
-  }
-
-  var network_suffix string
-  if (*ipv4only) {
+    fmt.Println("Specifying both -4 & -6 is redundant")
+  } else if (*ipv4only) {
     network_suffix = "4"
   } else if (*ipv6only) {
     network_suffix = "6"
-  } else {
-    network_suffix = ""
   }
 
   target_host := fmt.Sprintf("%s:%d via %s%s", *server, *port, *network, network_suffix)
