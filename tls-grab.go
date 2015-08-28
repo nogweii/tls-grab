@@ -6,6 +6,8 @@ import (
   "crypto/tls"
   "encoding/pem"
   "flag"
+  "crypto/sha256"
+  "strings"
 )
 
 func main() {
@@ -16,6 +18,7 @@ func main() {
   var ipv4only = flag.Bool("4", false, "Only connect via IPv4")
   var ipv6only = flag.Bool("6", false, "Only connect via IPv6")
   var verify = flag.Bool("verify", false, "Verify the provided certificate against trusted CAs")
+  var fingerprint = flag.Bool("fingerprint", false, "Print the SHA-256 fingerprint instead of the certificate")
   flag.Parse()
 
   if (*server == "") {
@@ -62,9 +65,14 @@ func main() {
       continue
     }
 
-    pem.Encode(os.Stdout, &pem.Block{
-      Type: "CERTIFICATE",
-      Bytes: cert.Raw,
-    })
+    if (*fingerprint) {
+      fmt.Println(strings.Replace(fmt.Sprintf("% X", sha256.Sum256(cert.Raw)),
+                  " ", ":", -1))
+    } else {
+      pem.Encode(os.Stdout, &pem.Block{
+        Type: "CERTIFICATE",
+        Bytes: cert.Raw,
+      })
+    }
   }
 }
