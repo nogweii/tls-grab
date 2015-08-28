@@ -15,6 +15,7 @@ func main() {
   var network = flag.String("net", "tcp", "Connect to this kind of network: tcp, udp, or unix")
   var ipv4only = flag.Bool("4", false, "Only connect via IPv4")
   var ipv6only = flag.Bool("6", false, "Only connect via IPv6")
+  var verify = flag.Bool("verify", false, "Verify the provided certificate against trusted CAs")
   flag.Parse()
 
   if (*server == "") {
@@ -38,12 +39,13 @@ func main() {
   network_type := fmt.Sprintf("%s%s", *network, network_suffix)
 
   conn, err := tls.Dial(network_type, target_host, &tls.Config{
-    InsecureSkipVerify: true,
+    InsecureSkipVerify: !(*verify),
   })
   if err != nil {
     panic("failed to connect: " + err.Error())
   }
   conn.Close()
+
   tls_state := conn.ConnectionState()
   remote_certs := tls_state.PeerCertificates
   for _, cert := range remote_certs {
