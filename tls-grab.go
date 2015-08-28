@@ -1,13 +1,24 @@
 package main
 
-//import "fmt"
-import "os"
-import "crypto/tls"
-import "crypto/x509"
-import "encoding/pem"
+import "fmt"
+//import "os"
+//import "crypto/tls"
+//import "crypto/x509"
+//import "encoding/pem"
+import "flag"
 
 func main() {
-  conn, err := tls.Dial("tcp", "mail.google.com:443", &tls.Config{
+
+  var server = flag.String("server", "mail.google.com", "The TLS host (name or IP) to connect to")
+  var port = flag.Int("port", 443, "The port the TLS service is running on")
+  flag.Parse()
+
+  target_host := fmt.Sprintf("%s:%d", &server, &port)
+
+  fmt.Println(target_host)
+
+  /*
+  conn, err := tls.Dial("tcp", target_host, &tls.Config{
     InsecureSkipVerify: true,
   })
   if err != nil {
@@ -44,4 +55,5 @@ func main() {
     }
     pem.Encode(os.Stdout, pem_pubkey)
   }
+  */
 }
