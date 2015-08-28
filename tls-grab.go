@@ -1,6 +1,7 @@
 package main
 
 import "fmt"
+import "os"
 //import "net"
 import "crypto/tls"
 
@@ -8,6 +9,8 @@ import "crypto/x509"
 //import "crypto/rsa"
 //import "crypto/dsa"
 //import "crypto/ecdsa"
+
+import "encoding/pem"
 
 func main() {
   fmt.Println("google's public key:")
@@ -32,21 +35,30 @@ func main() {
 
     fmt.Println("got cert #", cert_count)
 
+    var pem_type string = ""
+
     switch cert.PublicKeyAlgorithm {
     case x509.RSA:
       fmt.Println("it's a RSA key")
+      pem_type = "RSA PUBLIC KEY"
 
     case x509.ECDSA:
       fmt.Println("it's a ECDSA key")
+      pem_type = "ECDSA PUBLIC KEY"
 
     case x509.DSA:
       fmt.Println("it's a DSA key")
+      pem_type = "DSA PUBLIC KEY"
 
     default:
       fmt.Println("no clue")
     }
 
-    fmt.Println("subject print: ", cert.Subject)
+    pem_pubkey := &pem.Block{
+      Type: pem_type,
+      Bytes: cert.Raw,
+    }
+    pem.Encode(os.Stdout, pem_pubkey)
   }
   fmt.Println("didn't break?")
 }
