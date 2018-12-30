@@ -25,9 +25,10 @@ var (
 	verbose     = flag.BoolP("verbose", "V", false, "Print extra log messages")
 	all_certs   = flag.BoolP("all", "a", false, "Show every certificate, don't skip CA and intermediates")
 	version     = flag.Bool("version", false, "Display the version")
+	show_arg    = flag.Bool("arg", false, "Display a very important question")
 )
 
-var Version = "2.0.0"
+var Version = "2.0.1"
 
 func displayCert(cert x509.Certificate) {
 	if *fingerprint {
@@ -55,6 +56,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\n")
 	}
 
+	// For whatever reason, go doesn't like the MarkHidden function -- won't compile it.
+	// Effectively inline it here:
+	arg_flag := flag.Lookup("arg")
+	arg_flag.Hidden = true
+
 	flag.Parse()
 
   log.SetOutput(os.Stdout)
@@ -65,6 +71,22 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.WarnLevel)
+	}
+
+	if *show_arg {
+		fmt.Println(`
+                 _
+               /`+"`"+`_>
+              / /
+              |/
+          ____|    __
+         |    \.-`+"``"+`  )
+         |---`+"``"+`\  _.'
+      .-`+"`"+`'---`+"``"+`_.'
+     (__...--`+"``"+`
+		 
+Is this an ARG?`)
+		os.Exit(0)
 	}
 
 	if *version {
